@@ -2,7 +2,7 @@
   "name": "allibaas",
   "version": "0.0.1",
   "engines": {
-    "node": "22.x"
+    "node": "18.x"
   },
   "main": "main.js",
   "private": true,
