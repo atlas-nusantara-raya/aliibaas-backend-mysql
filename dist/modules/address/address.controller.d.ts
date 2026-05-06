@@ -1,0 +1,95 @@
+import { AddressService } from './address.service.js';
+import { CreateAddressDto, UpdateAddressDto } from './dto/address.dto.js';
+import { PaginationDto } from '../../shared/dto/pagination.dto.js';
+export declare class AddressController {
+    private readonly addressService;
+    constructor(addressService: AddressService);
+    create(req: any, createAddressDto: CreateAddressDto): Promise<{
+        id: number;
+        phone: string | null;
+        created_at: Date | null;
+        user_id: string | null;
+        address: string | null;
+        province_id: string | null;
+        province_name: string | null;
+        city_id: string | null;
+        city_name: string | null;
+        district_id: string | null;
+        district_name: string | null;
+        postal_code: string | null;
+        label: string | null;
+        recipient_name: string | null;
+        is_default: number | null;
+    }>;
+    findAll(req: any, pagination: PaginationDto): Promise<{
+        id: number;
+        phone: string | null;
+        created_at: Date | null;
+        user_id: string | null;
+        address: string | null;
+        province_id: string | null;
+        province_name: string | null;
+        city_id: string | null;
+        city_name: string | null;
+        district_id: string | null;
+        district_name: string | null;
+        postal_code: string | null;
+        label: string | null;
+        recipient_name: string | null;
+        is_default: number | null;
+    }[]>;
+    findByUserId(userId: string): Promise<{
+        id: number;
+        phone: string | null;
+        created_at: Date | null;
+        user_id: string | null;
+        address: string | null;
+        province_id: string | null;
+        province_name: string | null;
+        city_id: string | null;
+        city_name: string | null;
+        district_id: string | null;
+        district_name: string | null;
+        postal_code: string | null;
+        label: string | null;
+        recipient_name: string | null;
+        is_default: number | null;
+    }[]>;
+    update(req: any, id: number, updateAddressDto: UpdateAddressDto): Promise<{
+        id: number;
+        phone: string | null;
+        created_at: Date | null;
+        user_id: string | null;
+        address: string | null;
+        province_id: string | null;
+        province_name: string | null;
+        city_id: string | null;
+        city_name: string | null;
+        district_id: string | null;
+        district_name: string | null;
+        postal_code: string | null;
+        label: string | null;
+        recipient_name: string | null;
+        is_default: number | null;
+    }>;
+    remove(req: any, id: number): Promise<{
+        success: boolean;
+    }>;
+    setDefault(req: any, id: number): Promise<{
+        id: number;
+        phone: string | null;
+        created_at: Date | null;
+        user_id: string | null;
+        address: string | null;
+        province_id: string | null;
+        province_name: string | null;
+        city_id: string | null;
+        city_name: string | null;
+        district_id: string | null;
+        district_name: string | null;
+        postal_code: string | null;
+        label: string | null;
+        recipient_name: string | null;
+        is_default: number | null;
+    }>;
+}

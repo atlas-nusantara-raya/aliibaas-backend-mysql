@@ -1,0 +1,87 @@
+import { AdminAddressService } from './admin-address.service.js';
+import { CreateAdminAddressDto } from './dto/create-admin-address.dto.js';
+import { UpdateAdminAddressDto } from './dto/update-admin-address.dto.js';
+export declare class AdminAddressController {
+    private readonly adminAddressService;
+    constructor(adminAddressService: AdminAddressService);
+    create(createAdminAddressDto: CreateAdminAddressDto): Promise<{
+        id: number;
+        phone: string | null;
+        created_at: Date | null;
+        is_active: number | null;
+        address: string | null;
+        province_id: string | null;
+        province_name: string | null;
+        city_id: string | null;
+        city_name: string | null;
+        district_id: string | null;
+        district_name: string | null;
+        postal_code: string | null;
+        label: string | null;
+        recipient_name: string | null;
+    }>;
+    findAll(): Promise<{
+        id: number;
+        phone: string | null;
+        created_at: Date | null;
+        is_active: number | null;
+        address: string | null;
+        province_id: string | null;
+        province_name: string | null;
+        city_id: string | null;
+        city_name: string | null;
+        district_id: string | null;
+        district_name: string | null;
+        postal_code: string | null;
+        label: string | null;
+        recipient_name: string | null;
+    }[]>;
+    findOne(id: number): Promise<{
+        id: number;
+        phone: string | null;
+        created_at: Date | null;
+        is_active: number | null;
+        address: string | null;
+        province_id: string | null;
+        province_name: string | null;
+        city_id: string | null;
+        city_name: string | null;
+        district_id: string | null;
+        district_name: string | null;
+        postal_code: string | null;
+        label: string | null;
+        recipient_name: string | null;
+    }>;
+    update(id: number, updateAdminAddressDto: UpdateAdminAddressDto): Promise<{
+        id: number;
+        phone: string | null;
+        created_at: Date | null;
+        is_active: number | null;
+        address: string | null;
+        province_id: string | null;
+        province_name: string | null;
+        city_id: string | null;
+        city_name: string | null;
+        district_id: string | null;
+        district_name: string | null;
+        postal_code: string | null;
+        label: string | null;
+        recipient_name: string | null;
+    }>;
+    remove(id: number): Promise<{
+        id: number;
+        phone: string | null;
+        created_at: Date | null;
+        is_active: number | null;
+        address: string | null;
+        province_id: string | null;
+        province_name: string | null;
+        city_id: string | null;
+        city_name: string | null;
+        district_id: string | null;
+        district_name: string | null;
+        postal_code: string | null;
+        label: string | null;
+        recipient_name: string | null;
+    }>;
+}
