@@ -1,0 +1,380 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-1.1.x"]
+  engineType    = "library"
+}
+
+datasource db {
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+
+model MtBrand {
+  id          Int       @id @default(autoincrement())
+  name        String?   @db.VarChar(100)
+  description String?   @db.Text
+  products    Product[]
+
+  @@map("mt_brands")
+}
+
+model MtCategory {
+  id            Int       @id @default(autoincrement())
+  name          String?   @db.VarChar(100)
+  display_order Int?
+  created_at    DateTime? @default(now()) @db.DateTime(0)
+  products      Product[]
+
+  @@map("mt_categories")
+}
+
+model MtColor {
+  id       Int              @id @default(autoincrement())
+  name     String?          @db.VarChar(50)
+  variants ProductVariant[]
+
+  @@map("mt_colors")
+}
+
+model MtGender {
+  id       Int       @id @default(autoincrement())
+  code     String?   @db.VarChar(20)
+  name     String?   @db.VarChar(50)
+  products Product[]
+
+  @@map("mt_genders")
+}
+
+model ProductImage {
+  id         Int       @id @default(autoincrement())
+  product_id Int?
+  image_url  String?   @db.Text
+  is_primary Int?      @default(0) @db.TinyInt
+  created_at DateTime? @default(now()) @db.DateTime(0)
+  product    Product?  @relation(fields: [product_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "mt_product_images_ibfk_1")
+
+  @@index([product_id], map: "product_id")
+  @@map("mt_product_images")
+}
+
+model ProductVariant {
+  id               Int         @id @default(autoincrement())
+  product_id       Int?
+  color_id         Int?
+  size_id          Int?
+  sku              String?     @db.VarChar(100)
+  stock            Int?
+  price            Decimal?    @db.Decimal(12, 2)
+  discount_price   Decimal?    @db.Decimal(12, 2)
+  discount_percent Decimal?    @db.Decimal(5, 2)
+  discount_start   DateTime?   @db.DateTime(0)
+  discount_end     DateTime?   @db.DateTime(0)
+  product          Product?    @relation(fields: [product_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "mt_product_variants_ibfk_1")
+  color            MtColor?    @relation(fields: [color_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "mt_product_variants_ibfk_2")
+  size             MtSize?     @relation(fields: [size_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "mt_product_variants_ibfk_3")
+  cart_items       CartItem[]
+  order_items      OrderItem[]
+
+  @@unique([product_id, color_id, size_id], map: "uk_variant")
+  @@index([color_id], map: "color_id")
+  @@index([size_id], map: "size_id")
+  @@map("mt_product_variants")
+}
+
+model Product {
+  id          Int              @id @default(autoincrement())
+  name        String?          @db.VarChar(150)
+  description String?          @db.Text
+  category_id Int?
+  brand_id    Int?
+  base_price  Decimal?         @db.Decimal(12, 2)
+  is_active   Int?             @default(1) @db.TinyInt
+  created_at  DateTime?        @default(now()) @db.DateTime(0)
+  gender_id   Int?
+  images      ProductImage[]
+  variants    ProductVariant[]
+  gender      MtGender?        @relation(fields: [gender_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_product_gender")
+  category    MtCategory?      @relation(fields: [category_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "mt_products_ibfk_1")
+  brand       MtBrand?         @relation(fields: [brand_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "mt_products_ibfk_2")
+  reviews     Review[]
+  wishlists   Wishlist[]
+
+  @@index([brand_id], map: "brand_id")
+  @@index([category_id], map: "category_id")
+  @@index([gender_id], map: "fk_product_gender")
+  @@map("mt_products")
+}
+
+model MtRole {
+  id         Int        @id @default(autoincrement())
+  name       String     @unique(map: "name") @db.VarChar(50)
+  user_roles UserRole[]
+
+  @@map("mt_roles")
+}
+
+model MtSize {
+  id          Int              @id @default(autoincrement())
+  name        String?          @db.VarChar(10)
+  description String?          @db.VarChar(100)
+  variants    ProductVariant[]
+
+  @@map("mt_sizes")
+}
+
+model MtStatus {
+  id                        Int        @id @default(autoincrement())
+  type_status               String?    @db.VarChar(50)
+  code                      String?    @db.VarChar(50)
+  name                      String?    @db.VarChar(100)
+  description               String?    @db.Text
+  is_active                 Int?       @default(1) @db.TinyInt
+  orders_order_status       Order[]    @relation("tbl_orders_order_status_idTomt_statuses")
+  orders_payment_status     Order[]    @relation("tbl_orders_payment_status_idTomt_statuses")
+  payments_payment_method   Payment[]  @relation("tbl_payments_payment_method_idTomt_statuses")
+  shipments_shipment_status Shipment[] @relation("tbl_shipments_shipment_status_idTomt_statuses")
+
+  @@map("mt_statuses")
+}
+
+model CartItem {
+  id                 Int             @id @default(autoincrement())
+  cart_id            Int?
+  product_variant_id Int?
+  qty                Int?
+  cart               Cart?           @relation(fields: [cart_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "tbl_cart_items_ibfk_1")
+  product_variant    ProductVariant? @relation(fields: [product_variant_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "tbl_cart_items_ibfk_2")
+
+  @@index([cart_id], map: "cart_id")
+  @@index([product_variant_id], map: "product_variant_id")
+  @@map("tbl_cart_items")
+}
+
+model Cart {
+  id         Int        @id @default(autoincrement())
+  user_id    String?    @db.VarChar(50)
+  created_at DateTime?  @default(now()) @db.DateTime(0)
+  items      CartItem[]
+  user       User?      @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "tbl_carts_ibfk_1")
+
+  @@index([user_id], map: "user_id")
+  @@map("tbl_carts")
+}
+
+model OrderItem {
+  id                 Int             @id @default(autoincrement())
+  order_id           Int?
+  product_variant_id Int?
+  qty                Int?
+  price              Decimal?        @db.Decimal(12, 2)
+  subtotal           Decimal?        @db.Decimal(12, 2)
+  order              Order?          @relation(fields: [order_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "tbl_order_items_ibfk_1")
+  product_variant    ProductVariant? @relation(fields: [product_variant_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "tbl_order_items_ibfk_2")
+
+  @@index([order_id], map: "order_id")
+  @@index([product_variant_id], map: "product_variant_id")
+  @@map("tbl_order_items")
+}
+
+model Order {
+  id                Int         @id @default(autoincrement())
+  user_id           String?     @db.VarChar(50)
+  order_date        DateTime?   @default(now()) @db.DateTime(0)
+  idempotency_key   String?     @unique @db.VarChar(100)
+  total_amount      Decimal?    @db.Decimal(12, 2)
+  status            String?     @db.VarChar(50)
+  payment_status    String?     @db.VarChar(50)
+  name              String?     @db.VarChar(100)
+  phone             String?     @db.VarChar(20)
+  address           String?     @db.Text
+  province_id       String?     @db.VarChar(50)
+  province_name     String?     @db.VarChar(100)
+  city_id           String?     @db.VarChar(50)
+  city_name         String?     @db.VarChar(100)
+  district_id       String?     @db.VarChar(50)
+  district_name     String?     @db.VarChar(100)
+  postal_code       String?     @db.VarChar(10)
+  order_status_id   Int?
+  payment_status_id Int?
+  shipping_cost     Decimal?    @db.Decimal(12, 2)
+  courier           String?     @db.VarChar(50)
+  courier_service   String?     @db.VarChar(50)
+  items             OrderItem[]
+  order_status      MtStatus?   @relation("tbl_orders_order_status_idTomt_statuses", fields: [order_status_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_order_status")
+  status_payment    MtStatus?   @relation("tbl_orders_payment_status_idTomt_statuses", fields: [payment_status_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_payment_status")
+  user              User?       @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "tbl_orders_ibfk_1")
+  payments          Payment[]
+  shipments         Shipment[]
+
+  @@index([order_status_id], map: "fk_order_status")
+  @@index([payment_status_id], map: "fk_payment_status")
+  @@index([user_id], map: "user_id")
+  @@map("tbl_orders")
+}
+
+model Payment {
+  id                Int       @id @default(autoincrement())
+  order_id          Int?
+  payment_method    String?   @db.VarChar(50)
+  payment_date      DateTime? @db.DateTime(0)
+  amount            Decimal?  @db.Decimal(12, 2)
+  status            String?   @db.VarChar(50)
+  transaction_id    String?   @db.VarChar(100)
+  payment_method_id Int?
+  receipt_url       String?   @db.Text
+  payment_url       String?   @db.Text
+  va_number         String?   @db.VarChar(50)
+  bank_code         String?   @db.VarChar(20)
+  bank_name         String?   @db.VarChar(100)
+  qr_string         String?   @db.Text
+  payment_id        String?   @unique @db.VarChar(100)
+  expired_at        DateTime? @db.DateTime(0)
+  method            MtStatus? @relation("tbl_payments_payment_method_idTomt_statuses", fields: [payment_method_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_payment_method")
+  order             Order?    @relation(fields: [order_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "tbl_payments_ibfk_1")
+
+  @@index([payment_method_id], map: "fk_payment_method")
+  @@index([order_id], map: "order_id")
+  @@map("tbl_payments")
+}
+
+model Review {
+  id         Int       @id @default(autoincrement())
+  user_id    String?   @db.VarChar(50)
+  product_id Int?
+  rating     Int?
+  comment    String?   @db.Text
+  created_at DateTime? @default(now()) @db.DateTime(0)
+  user       User?     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "tbl_reviews_ibfk_1")
+  product    Product?  @relation(fields: [product_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "tbl_reviews_ibfk_2")
+
+  @@index([product_id], map: "product_id")
+  @@index([user_id], map: "user_id")
+  @@map("tbl_reviews")
+}
+
+model Shipment {
+  id                 Int       @id @default(autoincrement())
+  order_id           Int?
+  courier            String?   @db.VarChar(50)
+  tracking_number    String?   @db.VarChar(100)
+  shipping_date      DateTime? @db.DateTime(0)
+  delivery_date      DateTime? @db.DateTime(0)
+  status             String?   @db.VarChar(50)
+  shipment_status_id Int?
+  shipment_status    MtStatus? @relation("tbl_shipments_shipment_status_idTomt_statuses", fields: [shipment_status_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_shipment_status")
+  order              Order?    @relation(fields: [order_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "tbl_shipments_ibfk_1")
+
+  @@index([shipment_status_id], map: "fk_shipment_status")
+  @@index([order_id], map: "order_id")
+  @@map("tbl_shipments")
+}
+
+model UserAddress {
+  id             Int       @id @default(autoincrement())
+  user_id        String?   @db.VarChar(50)
+  label          String?   @db.VarChar(50)
+  recipient_name String?   @db.VarChar(100)
+  phone          String?   @db.VarChar(20)
+  address        String?   @db.Text
+  province_id    String?   @db.VarChar(50)
+  province_name  String?   @db.VarChar(100)
+  city_id        String?   @db.VarChar(50)
+  city_name      String?   @db.VarChar(100)
+  district_id    String?   @db.VarChar(50)
+  district_name  String?   @db.VarChar(100)
+  postal_code    String?   @db.VarChar(10)
+  is_default     Int?      @default(0) @db.TinyInt
+  created_at     DateTime? @default(now()) @db.DateTime(0)
+  user           User?     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "tbl_user_addresses_ibfk_1")
+
+  @@index([user_id], map: "user_id")
+  @@map("tbl_user_addresses")
+}
+
+model AdminAddress {
+  id             Int       @id @default(autoincrement())
+  label          String?   @db.VarChar(50)
+  recipient_name String?   @db.VarChar(100)
+  phone          String?   @db.VarChar(20)
+  address        String?   @db.Text
+  province_id    String?   @db.VarChar(50)
+  province_name  String?   @db.VarChar(100)
+  city_id        String?   @db.VarChar(50)
+  city_name      String?   @db.VarChar(100)
+  district_id    String?   @db.VarChar(50)
+  district_name  String?   @db.VarChar(100)
+  postal_code    String?   @db.VarChar(10)
+  is_active      Int?      @default(1) @db.TinyInt
+  created_at     DateTime? @default(now()) @db.DateTime(0)
+
+  @@map("tbl_admin_addresses")
+}
+
+model UserRole {
+  user_id String @db.VarChar(50)
+  role_id Int
+  user    User   @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "tbl_user_roles_ibfk_1")
+  role    MtRole @relation(fields: [role_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "tbl_user_roles_ibfk_2")
+
+  @@id([user_id, role_id])
+  @@index([role_id], map: "role_id")
+  @@map("tbl_user_roles")
+}
+
+model User {
+  id         String        @id @db.VarChar(50)
+  name       String?       @db.VarChar(100)
+  email      String?       @unique(map: "email") @db.VarChar(100)
+  password   String?       @db.VarChar(255)
+  phone      String?       @db.VarChar(20)
+  created_at DateTime?     @default(now()) @db.DateTime(0)
+  carts      Cart[]
+  orders     Order[]
+  reviews    Review[]
+  addresses  UserAddress[]
+  roles      UserRole[]
+  wishlists  Wishlist[]
+  notifications Notification[]
+
+  @@map("tbl_users")
+}
+
+model Notification {
+  id         Int      @id @default(autoincrement())
+  user_id    String?  @db.VarChar(50)
+  title      String?  @db.VarChar(255)
+  message    String?  @db.Text
+  is_read    Int?     @default(0) @db.TinyInt
+  created_at DateTime @default(now()) @db.DateTime(0)
+  user       User?    @relation(fields: [user_id], references: [id])
+
+  @@map("tbl_notifications")
+}
+
+model Wishlist {
+  id         Int       @id @default(autoincrement())
+  user_id    String?   @db.VarChar(50)
+  product_id Int?
+  created_at DateTime? @default(now()) @db.DateTime(0)
+  user       User?     @relation(fields: [user_id], references: [id])
+  product    Product?  @relation(fields: [product_id], references: [id])
+
+  @@unique([user_id, product_id])
+  @@index([user_id], map: "user_id")
+  @@index([product_id], map: "product_id")
+  @@map("tbl_wishlists")
+}
+
+model AuditTrail {
+  id         Int      @id @default(autoincrement())
+  user_id    String?  @db.VarChar(50)
+  method     String?  @db.VarChar(10)
+  url        String?  @db.Text
+  payload    String?  @db.LongText
+  ip_address String?  @db.VarChar(50)
+  user_agent String?  @db.Text
+  created_at DateTime @default(now()) @db.DateTime(0)
+
+  @@map("tbl_audit_trails")
+}
