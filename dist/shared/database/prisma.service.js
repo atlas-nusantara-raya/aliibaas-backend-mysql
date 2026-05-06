@@ -45,8 +45,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.PrismaService = void 0;
 const common_1 = require("@nestjs/common");
 const client_1 = require("@prisma/client");
-const adapter_mariadb_1 = require("@prisma/adapter-mariadb");
-const mariadb = __importStar(require("mariadb"));
+//const adapter_mariadb_1 = require("@prisma/adapter-mariadb");
+//const mariadb = __importStar(require("mariadb"));
 let PrismaService = class PrismaService extends client_1.PrismaClient {
     logger = new common_1.Logger('PrismaService');
     pool = null;
