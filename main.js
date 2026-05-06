@@ -26,7 +26,6 @@ if (fs.existsSync('.env')) {
 }
 
 // 2. Automatic NPM Install if node_modules is missing
-/*
 const nodeModulesPath = path.join(__dirname, 'node_modules');
 const nestjsPath = path.join(nodeModulesPath, '@nestjs');
 if (!fs.existsSync(nodeModulesPath) || !fs.existsSync(nestjsPath)) {
@@ -39,7 +38,7 @@ if (!fs.existsSync(nodeModulesPath) || !fs.existsSync(nestjsPath)) {
         console.error('❌ npm install failed. The app may fail to start:', e.message);
     }
 }
-*/
+
 // 3. Sync Prisma Client from pre-generated bundle
 try {
     const sourceDir = path.join(__dirname, 'prisma', 'pre-generated-client');
